@@ -9,3 +9,7 @@ func NewCompiler() *Compiler{
 
 	}
 }
+
+func (c Compiler) Compile() []byte{
+	return []byte{}
+}
