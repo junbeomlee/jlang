@@ -4,6 +4,8 @@ import (
 	"bytes"
 )
 
+const eof = 0
+
 type Lexer struct {
 	filename string
 	input    string
@@ -14,16 +16,22 @@ type Lexer struct {
 }
 
 func New(input string) *Lexer {
-	return &Lexer{
+	l := &Lexer{
 		input:   input,
 		tokench: make(chan Token, 2),
 	}
+
+	go l.run()
+	return l
 }
 
-const eof = 0
-
-// stateFn represents the state of the scanner as a function that returns the next state.
-type stateFn func(*Lexer) stateFn
+// run runs the state machine for the lexer.
+func (l *Lexer) run() {
+	for state := lexInput; state != nil; {
+		state = state(l)
+	}
+	close(l.tokench)
+}
 
 func (l *Lexer) next() byte {
 
@@ -49,7 +57,7 @@ func (l *Lexer) backup() {
 	}
 }
 
-// peek returns but does not consume the next rune in the input.
+// peek returns but does not consume the next byte in the input.
 func (l *Lexer) peek() byte {
 	ch := l.next()
 	l.backup()
@@ -62,7 +70,7 @@ func (l *Lexer) emit(t TokenType) {
 	l.start = l.pos
 }
 
-// nextItem returns the next item from the input.
+// nextToken returns the next token from the input.
 // Called by the parser, not in the lexing goroutine.
 func (l *Lexer) NextToken() Token {
 	return <-l.tokench
@@ -75,7 +83,7 @@ func (l *Lexer) NextToken() Token {
 //	l.start = l.pos
 //}
 //
-// accept consumes the next rune if it's from the valid set.
+// accept consumes the next byte if it's from the valid set.
 func (l *Lexer) accept(valid string) bool {
 
 	ch := l.next()
@@ -92,7 +100,7 @@ func (l *Lexer) accept(valid string) bool {
 	return false
 }
 
-// acceptRun consumes a run of runes from the valid set.
+// acceptRun consumes a run of byte from the valid set.
 func (l *Lexer) acceptRun(valid string) {
 
 	var ch byte
@@ -117,3 +125,39 @@ func (l *Lexer) acceptRun(valid string) {
 //	return nil
 //}
 //
+
+// stateFn represents the state of the scanner as a function that returns the next state.
+type stateFn func(*Lexer) stateFn
+
+// lexInput is a basic scanner that scans the elements
+func lexInput(l *Lexer) stateFn {
+	ch := l.next()
+
+	switch ch {
+	case '=':
+		l.emit(ASSIGN)
+	case ';':
+		l.emit(SEMICOLON)
+	case ')':
+		l.emit(RPAREN)
+	case '(':
+		l.emit(LPAREN)
+	case ',':
+		l.emit(COMMA)
+	case '+':
+		l.emit(PLUS)
+	case '{':
+		l.emit(LBRACE)
+	case '}':
+		l.emit(RBRACE)
+	case 0:
+		l.emit(EOF)
+	}
+
+	return lexInput
+}
+
+//
+//func lexNumber(l *Lexer) stateFn {
+//
+//}
