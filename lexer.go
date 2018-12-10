@@ -2,6 +2,7 @@ package jlang
 
 import (
 	"bytes"
+	"strings"
 )
 
 const eof = 0
@@ -70,6 +71,11 @@ func (l *Lexer) emit(t TokenType) {
 	l.start = l.pos
 }
 
+func (l *Lexer) ignore() {
+	l.line += strings.Count(l.input[l.start:l.pos], "\n")
+	l.start = l.pos
+}
+
 // nextToken returns the next token from the input.
 // Called by the parser, not in the lexing goroutine.
 func (l *Lexer) NextToken() Token {
@@ -131,33 +137,83 @@ type stateFn func(*Lexer) stateFn
 
 // lexInput is a basic scanner that scans the elements
 func lexInput(l *Lexer) stateFn {
-	ch := l.next()
 
-	switch ch {
-	case '=':
+	switch ch := l.next(); {
+	case ch == '=':
 		l.emit(ASSIGN)
-	case ';':
+	case ch == ';':
 		l.emit(SEMICOLON)
-	case ')':
+	case ch == ')':
 		l.emit(RPAREN)
-	case '(':
+	case ch == '(':
 		l.emit(LPAREN)
-	case ',':
+	case ch == ',':
 		l.emit(COMMA)
-	case '+':
+	case ch == '+':
 		l.emit(PLUS)
-	case '{':
+	case ch == '{':
 		l.emit(LBRACE)
-	case '}':
+	case ch == '}':
 		l.emit(RBRACE)
-	case 0:
+	case isSpace(ch):
+		l.backup()
+		return lexSpace
+	case isDigit(ch):
+		return lexNumber
+	case isLetter(ch):
+		l.backup()
+		return lexIdentifier
+	case ch == 0:
 		l.emit(EOF)
 	}
 
 	return lexInput
 }
 
-//
-//func lexNumber(l *Lexer) stateFn {
-//
-//}
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+func isSpace(ch byte) bool {
+	return ch == ' ' || ch == '\t'
+}
+
+func isDigit(ch byte) bool {
+	return ch == '+' || ch == '-' || ('0' <= ch && ch <= '9')
+}
+
+// lexIdentifier scans an alphanumeric.
+func lexIdentifier(l *Lexer) stateFn {
+
+	// next until the end of letters
+	for isLetter(l.next()) {
+	}
+	l.backup()
+
+	// check whether it is keyword or not
+	word := l.input[l.start:l.pos]
+	tokenType, ok := keywords[word]
+	if ok {
+		l.emit(tokenType)
+	} else {
+		l.emit(IDENT)
+	}
+
+	return lexInput
+}
+
+func lexSpace(l *Lexer) stateFn {
+	for isSpace(l.peek()) {
+		l.next()
+	}
+	l.ignore()
+	return lexInput
+}
+
+func lexNumber(l *Lexer) stateFn {
+	for isDigit(l.next()) {
+	}
+	l.backup()
+	l.emit(INT)
+	return lexInput
+}
