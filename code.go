@@ -11,7 +11,7 @@ const (
 )
 
 // Description for opcode
-type OpcodeDesc struct{
+type OpcodeDesc struct {
 
 	// Name of opcodes
 	Name string
@@ -29,7 +29,6 @@ func init() {
 	opDictionary[OpConstant] = OpcodeDesc{"OpConstant", []int{2}}
 }
 
-
-func Encode() []byte{
-
-}
+//func Encode() []byte{
+//
+//}
