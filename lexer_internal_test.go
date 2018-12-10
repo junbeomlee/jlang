@@ -42,9 +42,13 @@ func TestNext_lexer(t *testing.T) {
 		{byte(0)},
 	}
 
-	lex := New(input)
+	lex := &Lexer{
+		input: input,
+	}
+
 	for _, test := range tests {
-		assert.Equal(t, test.expectedByte, lex.next())
+		ch := lex.next()
+		assert.Equal(t, test.expectedByte, ch)
 	}
 
 	assert.Equal(t, lex.line, 1)
@@ -52,7 +56,9 @@ func TestNext_lexer(t *testing.T) {
 
 func TestBackup_lexer(t *testing.T) {
 	input := "he\na"
-	lex := New(input)
+	lex := &Lexer{
+		input: input,
+	}
 
 	assert.Equal(t, lex.next(), byte('h'))
 
@@ -71,7 +77,9 @@ func TestBackup_lexer(t *testing.T) {
 
 func TestPeek_lexer(t *testing.T) {
 	input := "he\na"
-	lex := New(input)
+	lex := &Lexer{
+		input: input,
+	}
 
 	// pick return next char but does not increase pos
 	assert.Equal(t, lex.peek(), byte('h'))
@@ -81,7 +89,10 @@ func TestPeek_lexer(t *testing.T) {
 
 func TestEmit_lexer(t *testing.T) {
 	input := "he\na"
-	lex := New(input)
+	lex := &Lexer{
+		input:   input,
+		tokench: make(chan Token),
+	}
 	go func() {
 		lex.next()
 		lex.emit(IDENT)
@@ -100,7 +111,9 @@ func TestEmit_lexer(t *testing.T) {
 
 func TestAccept_lexer(t *testing.T) {
 	input := "he\na"
-	lex := New(input)
+	lex := &Lexer{
+		input: input,
+	}
 
 	assert.True(t, lex.accept("h"))
 	assert.False(t, lex.accept("h"))
