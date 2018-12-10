@@ -46,8 +46,11 @@ const (
 type TokenType string
 
 type Token struct {
-	Type TokenType
-	Val  string
+	Type   TokenType
+	Val    string
+	Column int
+	Offset int
+	Line   int
 }
 
 func (t Token) String() string {

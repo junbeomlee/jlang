@@ -78,3 +78,41 @@ func TestPeek_lexer(t *testing.T) {
 	assert.Equal(t, lex.start, 0)
 	assert.Equal(t, lex.pos, 0)
 }
+
+func TestEmit_lexer(t *testing.T) {
+	input := "he\na"
+	lex := New(input)
+	go func() {
+		lex.next()
+		lex.emit(IDENT)
+	}()
+
+	ch := <-lex.tokench
+
+	assert.Equal(t, ch, Token{
+		Val:    "h",
+		Type:   IDENT,
+		Column: 0,
+		Line:   0,
+		Offset: 1,
+	})
+}
+
+func TestAccept_lexer(t *testing.T) {
+	input := "he\na"
+	lex := New(input)
+
+	assert.True(t, lex.accept("h"))
+	assert.False(t, lex.accept("h"))
+	assert.Equal(t, lex.next(), byte('e'))
+}
+
+func TestAcceptRun_lexer(t *testing.T) {
+
+	input := "he\nak"
+	lex := New(input)
+
+	lex.acceptRun("he\na")
+	assert.Equal(t, lex.next(), byte('k'))
+	assert.Equal(t, lex.next(), byte(eof))
+}

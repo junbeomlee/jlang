@@ -1,5 +1,9 @@
 package jlang
 
+import (
+	"bytes"
+)
+
 //
 //type Position struct {
 //	Filename string // filename, if any
@@ -30,16 +34,17 @@ const eof = 0
 type stateFn func(*Lexer) stateFn
 
 func (l *Lexer) next() byte {
+
 	if int(l.pos) >= len(l.input) {
 		return eof
 	}
+
 	ch := l.input[l.pos]
 	if ch == '\n' {
 		l.line++
 	}
 
 	l.pos += 1
-
 	return ch
 }
 
@@ -59,16 +64,18 @@ func (l *Lexer) peek() byte {
 	return ch
 }
 
-//// emit passes an item back to the client.
-//func (l *lexer) emit(t itemType) {
-//	l.items <- item{t, l.start, l.input[l.start:l.pos], l.line}
-//	// Some items contain text internally. If so, count their newlines.
-//	switch t {
-//	case itemText, itemRawString, itemLeftDelim, itemRightDelim:
-//		l.line += strings.Count(l.input[l.start:l.pos], "\n")
-//	}
-//	l.start = l.pos
-//}
+// emit passes an token back
+func (l *Lexer) emit(t TokenType) {
+	l.tokench <- Token{t, l.input[l.start:l.pos], l.start, l.pos, l.line}
+	l.start = l.pos
+}
+
+// nextItem returns the next item from the input.
+// Called by the parser, not in the lexing goroutine.
+func (l *Lexer) NextToken() Token {
+	return <-l.tokench
+}
+
 //
 //// ignore skips over the pending input before this point.
 //func (l *lexer) ignore() {
@@ -76,21 +83,40 @@ func (l *Lexer) peek() byte {
 //	l.start = l.pos
 //}
 //
-//// accept consumes the next rune if it's from the valid set.
-//func (l *lexer) accept(valid string) bool {
-//	if strings.ContainsRune(valid, l.next()) {
-//		return true
-//	}
-//	l.backup()
-//	return false
-//}
-//
-//// acceptRun consumes a run of runes from the valid set.
-//func (l *lexer) acceptRun(valid string) {
-//	for strings.ContainsRune(valid, l.next()) {
-//	}
-//	l.backup()
-//}
+// accept consumes the next rune if it's from the valid set.
+func (l *Lexer) accept(valid string) bool {
+
+	ch := l.next()
+	if bytes.Contains([]byte(valid), []byte{ch}) {
+		return true
+	}
+
+	// eof
+	if ch == 0 {
+		return false
+	}
+
+	l.backup()
+	return false
+}
+
+// acceptRun consumes a run of runes from the valid set.
+func (l *Lexer) acceptRun(valid string) {
+
+	var ch byte
+	for {
+		ch = l.next()
+		if !bytes.Contains([]byte(valid), []byte{ch}) {
+			break
+		}
+	}
+
+	if ch == 0 {
+		return
+	}
+	l.backup()
+}
+
 //
 //// errorf returns an error token and terminates the scan by passing
 //// back a nil pointer that will be the next state, terminating l.nextItem.
@@ -99,8 +125,3 @@ func (l *Lexer) peek() byte {
 //	return nil
 //}
 //
-//// nextItem returns the next item from the input.
-//// Called by the parser, not in the lexing goroutine.
-//func (l *lexer) nextItem() item {
-//	return <-l.items
-//}
