@@ -1,11 +1,11 @@
 package jlang
 
-type VM struct{
+type VM struct {
 	rawByteCode []byte
 }
 
-func NewVM(rawByteCode []byte) *VM{
+func NewVM(rawByteCode []byte) *VM {
 	return &VM{
-		rawByteCode:rawByteCode,
+		rawByteCode: rawByteCode,
 	}
 }

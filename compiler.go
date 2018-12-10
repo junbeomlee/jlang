@@ -1,15 +1,12 @@
 package jlang
 
-type Compiler struct{
-
+type Compiler struct {
 }
 
-func NewCompiler() *Compiler{
-	return &Compiler{
-
-	}
+func NewCompiler() *Compiler {
+	return &Compiler{}
 }
 
-func (c Compiler) Compile() []byte{
+func (c Compiler) Compile() []byte {
 	return []byte{}
 }

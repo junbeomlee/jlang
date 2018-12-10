@@ -1,10 +1,10 @@
 package jlang
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
-func Test_ad(t *testing.T){
+func Test_ad(t *testing.T) {
 	fmt.Println(OpConstant)
 }
