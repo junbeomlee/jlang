@@ -212,9 +212,17 @@ func isDigit(ch byte) bool {
 func lexIdentifier(l *Lexer) stateFn {
 
 	// next until the end of letters
-	for isLetter(l.next()) {
+	var ch byte
+	for {
+		ch = l.next()
+		if !isLetter(ch) {
+			break
+		}
 	}
-	l.backup()
+
+	if ch != eof {
+		l.backup()
+	}
 
 	// check whether it is keyword or not
 	word := l.input[l.start:l.pos]
@@ -237,9 +245,17 @@ func lexSpace(l *Lexer) stateFn {
 }
 
 func lexNumber(l *Lexer) stateFn {
-	for isDigit(l.next()) {
+	var ch byte
+	for {
+		ch = l.next()
+		if !isDigit(ch) {
+			break
+		}
 	}
-	l.backup()
+	if ch != eof {
+		l.backup()
+	}
+
 	l.emit(INT)
 	return lexInput
 }

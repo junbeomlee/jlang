@@ -1,7 +1,5 @@
 package jlang
 
-import "fmt"
-
 const (
 	ILLEGAL TokenType = "ILLEGAL"
 	EOF     TokenType = "EOF"
@@ -63,17 +61,17 @@ type Token struct {
 	Line   int
 }
 
-func (t Token) String() string {
-	switch t.Type {
-	case ILLEGAL:
-		return "ILLEGAL"
-	case EOF:
-		return "EOF"
-	}
-
-	if len(t.Val) > 10 {
-		return fmt.Sprintf("%.10q...", t.Val)
-	}
-
-	return fmt.Sprintf("%q", t.Val)
-}
+//func (t Token) String() string {
+//	switch t.Type {
+//	case ILLEGAL:
+//		return "ILLEGAL"
+//	case EOF:
+//		return "EOF"
+//	}
+//
+//	if len(t.Val) > 10 {
+//		return fmt.Sprintf("%.10q...", t.Val)
+//	}
+//
+//	return fmt.Sprintf("%q", t.Val)
+//}

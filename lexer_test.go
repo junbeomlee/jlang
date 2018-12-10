@@ -3,6 +3,8 @@ package jlang
 import (
 	"testing"
 
+	"fmt"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -218,4 +220,16 @@ func TestLexer_NextToken3(t *testing.T) {
 		t.Fatalf("num of line was wrong. expected=%q, got=%q",
 			18, l.line)
 	}
+}
+
+func TestLexer_NextToken4(t *testing.T) {
+	input := `let a = 5;`
+
+	l := New(input)
+	fmt.Print(l.NextToken())
+	fmt.Print(l.NextToken())
+	fmt.Print(l.NextToken())
+	fmt.Print(l.NextToken())
+	fmt.Print(l.NextToken())
+	fmt.Print(l.NextToken())
 }
