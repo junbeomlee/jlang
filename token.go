@@ -65,6 +65,8 @@ type Token struct {
 
 func (t Token) String() string {
 	switch t.Type {
+	case ILLEGAL:
+		return "ILLEGAL"
 	case EOF:
 		return "EOF"
 	}

@@ -2,7 +2,6 @@ package jlang
 
 import (
 	"bytes"
-	"strings"
 )
 
 const eof = 0
@@ -72,7 +71,7 @@ func (l *Lexer) emit(t TokenType) {
 }
 
 func (l *Lexer) ignore() {
-	l.line += strings.Count(l.input[l.start:l.pos], "\n")
+	//l.line += strings.Count(l.input[l.start:l.pos], "\n")
 	l.start = l.pos
 }
 
@@ -140,7 +139,33 @@ func lexInput(l *Lexer) stateFn {
 
 	switch ch := l.next(); {
 	case ch == '=':
-		l.emit(ASSIGN)
+		if l.peek() == '=' {
+			l.next()
+			l.emit(EQ)
+		} else {
+			l.emit(ASSIGN)
+		}
+	case ch == '+':
+		l.emit(PLUS)
+	case ch == '-':
+		l.emit(MINUS)
+	case ch == '!':
+		if l.peek() == '=' {
+			l.next()
+			l.emit(NOT_EQ)
+		} else {
+			l.emit(BANG)
+		}
+	case ch == '/':
+		l.emit(SLASH)
+	case ch == '*':
+		l.emit(ASTERISK)
+
+	case ch == '<':
+		l.emit(LT)
+	case ch == '>':
+		l.emit(GT)
+
 	case ch == ';':
 		l.emit(SEMICOLON)
 	case ch == ')':
@@ -156,7 +181,6 @@ func lexInput(l *Lexer) stateFn {
 	case ch == '}':
 		l.emit(RBRACE)
 	case isSpace(ch):
-		l.backup()
 		return lexSpace
 	case isDigit(ch):
 		return lexNumber
@@ -165,6 +189,8 @@ func lexInput(l *Lexer) stateFn {
 		return lexIdentifier
 	case ch == 0:
 		l.emit(EOF)
+	default:
+		l.emit(ILLEGAL)
 	}
 
 	return lexInput
@@ -175,7 +201,7 @@ func isLetter(ch byte) bool {
 }
 
 func isSpace(ch byte) bool {
-	return ch == ' ' || ch == '\t'
+	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
 }
 
 func isDigit(ch byte) bool {
