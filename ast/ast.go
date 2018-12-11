@@ -95,3 +95,22 @@ func (rs *ReturnStatement) String() string {
 	out.WriteString(";")
 	return out.String()
 }
+
+type ExpressionStatement struct {
+	Token      jlang.Token
+	Expression Expression
+}
+
+func (es *ExpressionStatement) statementNode() {}
+func (es *ExpressionStatement) TokenValue() string {
+	return es.Token.Val
+}
+
+func (es *ExpressionStatement) String() string {
+	var out bytes.Buffer
+	if es.Expression != nil {
+		out.WriteString(es.Expression.String())
+	}
+
+	return out.String()
+}
