@@ -60,7 +60,11 @@ func (l *Lexer) backup() {
 // peek returns but does not consume the next byte in the input.
 func (l *Lexer) peek() byte {
 	ch := l.next()
-	l.backup()
+
+	if ch != eof {
+		l.backup()
+	}
+
 	return ch
 }
 
@@ -240,6 +244,7 @@ func lexSpace(l *Lexer) stateFn {
 	for isSpace(l.peek()) {
 		l.next()
 	}
+
 	l.ignore()
 	return lexInput
 }
