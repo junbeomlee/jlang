@@ -86,7 +86,7 @@ func TestParser_Parse_ReturnStatements(t *testing.T) {
 			t.Errorf("stmt not *ast.returnStatement. got=%T", stmt)
 		}
 
-		if returnStmt.String() != "return" {
+		if returnStmt.TokenValue() != "return" {
 			t.Errorf("returnStmt.TokenLiteral not 'return', got %q", returnStmt.String())
 		}
 	}

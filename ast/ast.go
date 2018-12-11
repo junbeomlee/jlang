@@ -1,10 +1,13 @@
 package ast
 
 import (
+	"bytes"
+
 	"github.com/junbeomlee/jlang"
 )
 
 type Node interface {
+	TokenValue() string
 	String() string
 }
 
@@ -22,12 +25,22 @@ type Program struct {
 	Statements []Statement
 }
 
-func (p *Program) Value() string {
+func (p *Program) TokenValue() string {
 	if len(p.Statements) > 0 {
-		return p.Statements[0].String()
+		return p.Statements[0].TokenValue()
 	} else {
 		return ""
 	}
+}
+
+func (p *Program) String() string {
+	var out bytes.Buffer
+
+	for _, s := range p.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
 }
 
 type Identifier struct {
@@ -42,8 +55,22 @@ type LetStatement struct {
 }
 
 func (ls *LetStatement) statementNode() {}
-func (ls *LetStatement) String() string {
+
+func (ls *LetStatement) TokenValue() string {
 	return ls.Token.Val
+}
+
+func (ls *LetStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(ls.Token.Val + " ")
+	out.WriteString(ls.Ident.Value + " = ")
+
+	if ls.Value != nil {
+		out.WriteString(ls.Value.String() + " ")
+	}
+
+	out.WriteString(";")
+	return out.String()
 }
 
 type ReturnStatement struct {
@@ -52,6 +79,19 @@ type ReturnStatement struct {
 }
 
 func (rs *ReturnStatement) statementNode() {}
-func (rs *ReturnStatement) String() string {
+
+func (rs *ReturnStatement) TokenValue() string {
 	return rs.Token.Val
+}
+
+func (rs *ReturnStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(rs.Token.Val + " ")
+
+	if rs.ReturnValue != nil {
+		out.WriteString(rs.ReturnValue.String() + " ")
+	}
+
+	out.WriteString(";")
+	return out.String()
 }
