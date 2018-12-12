@@ -14,6 +14,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Printf("Hello %s! This is the J-lang programming language!\n",
 		user.Username)
 	fmt.Printf("Feel free to type in commands\n")

@@ -48,6 +48,16 @@ type Identifier struct {
 	Value string
 }
 
+func (i *Identifier) expressionNode() {}
+
+func (i *Identifier) TokenValue() string {
+	return i.Token.Val
+}
+
+func (i *Identifier) String() string {
+	return i.Token.Val
+}
+
 type LetStatement struct {
 	Token jlang.Token
 	Ident *Identifier
@@ -66,7 +76,7 @@ func (ls *LetStatement) String() string {
 	out.WriteString(ls.Ident.Value + " = ")
 
 	if ls.Value != nil {
-		out.WriteString(ls.Value.String() + " ")
+		out.WriteString(ls.Value.String())
 	}
 
 	out.WriteString(";")

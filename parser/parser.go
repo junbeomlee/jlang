@@ -7,12 +7,20 @@ import (
 	"github.com/junbeomlee/jlang/ast"
 )
 
+type (
+	prefixParsefn func() ast.Expression
+	infixParsefn  func(expression ast.Expression) ast.Expression
+)
+
 type Parser struct {
 	l      *jlang.Lexer
 	errors []string
 
 	curToken  jlang.Token
 	nextToken jlang.Token
+
+	prefixParsefns map[jlang.TokenType]prefixParsefn
+	infixParsefns  map[jlang.TokenType]infixParsefn
 }
 
 func New(l *jlang.Lexer) *Parser {
@@ -24,6 +32,14 @@ func New(l *jlang.Lexer) *Parser {
 	p.next()
 
 	return p
+}
+
+func (p *Parser) registerPrefix(tokenType jlang.TokenType, fn prefixParsefn) {
+	p.prefixParsefns[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType jlang.TokenType, fn infixParsefn) {
+	p.infixParsefns[tokenType] = fn
 }
 
 func (p *Parser) Errors() []string {
