@@ -66,6 +66,8 @@ func New(l *jlang.Lexer) *Parser {
 	p.registerPrefix(jlang.INT, p.parseIntegerLiteral)
 	p.registerPrefix(jlang.BANG, p.parsePrefixExpression)
 	p.registerPrefix(jlang.MINUS, p.parsePrefixExpression)
+	p.registerPrefix(jlang.TRUE, p.parseBooleanLiteral)
+	p.registerPrefix(jlang.FALSE, p.parseBooleanLiteral)
 
 	p.infixParsefns = make(map[jlang.TokenType]infixParsefn)
 	p.registerInfix(jlang.EQ, p.parseInfixExpression)
@@ -102,6 +104,18 @@ func (p *Parser) registerPrefix(tokenType jlang.TokenType, fn prefixParsefn) {
 
 func (p *Parser) registerInfix(tokenType jlang.TokenType, fn infixParsefn) {
 	p.infixParsefns[tokenType] = fn
+}
+
+func (p *Parser) parseBooleanLiteral() ast.Expression {
+	booleanLiteral := &ast.BooleanLiteral{Token: p.curToken}
+	b, err := strconv.ParseBool(p.curToken.Val)
+	if err != nil {
+		p.Error(fmt.Sprintf("could not parse %q as bool", p.curToken.Val))
+		return nil
+	}
+
+	booleanLiteral.Value = b
+	return booleanLiteral
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
@@ -248,8 +262,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		}
 
 		p.next()
-		infixExp := infix(leftExp)
-		return infixExp
+		leftExp = infix(leftExp)
 	}
 
 	return leftExp

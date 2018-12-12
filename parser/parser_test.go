@@ -307,6 +307,43 @@ func TestParser_Parse_OperatorPrecedenceParsing(t *testing.T) {
 	}
 }
 
+func TestParser_Parse_BooleanExpression(t *testing.T) {
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			"true",
+			"true",
+		},
+		{
+			"false",
+			"false",
+		},
+		{
+			"3 > 5 == false",
+			"((3 > 5) == false)",
+		},
+		{
+			"3 < 5 == true",
+			"((3 < 5) == true)",
+		},
+	}
+
+	for _, tt := range tests {
+		l := jlang.New(tt.input)
+		p := New(l)
+		program := p.Parse()
+		checkParserErrors(t, p)
+
+		actual := program.String()
+		if actual != tt.expected {
+			t.Errorf("expected=%q, got=%q", tt.expected, actual)
+		}
+	}
+}
+
 func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
 	integerLiteral, ok := exp.(*ast.IntegerLiteral)
 

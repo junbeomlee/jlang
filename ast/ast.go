@@ -73,6 +73,21 @@ func (i *IntegerLiteral) String() string {
 	return i.Token.Val
 }
 
+type BooleanLiteral struct {
+	Token jlang.Token
+	Value bool
+}
+
+func (b *BooleanLiteral) expressionNode() {}
+
+func (b *BooleanLiteral) TokenValue() string {
+	return b.Token.Val
+}
+
+func (b *BooleanLiteral) String() string {
+	return b.Token.Val
+}
+
 // PrefixExpression form will be <operator> <right expression>
 type PrefixExpression struct {
 	Token           jlang.Token
