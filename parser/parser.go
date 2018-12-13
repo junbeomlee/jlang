@@ -68,6 +68,8 @@ func New(l *jlang.Lexer) *Parser {
 	p.registerPrefix(jlang.MINUS, p.parsePrefixExpression)
 	p.registerPrefix(jlang.TRUE, p.parseBooleanLiteral)
 	p.registerPrefix(jlang.FALSE, p.parseBooleanLiteral)
+	p.registerPrefix(jlang.LPAREN, p.parseGroupedExpression)
+	p.registerPrefix(jlang.IF, p.parseIfExpression)
 
 	p.infixParsefns = make(map[jlang.TokenType]infixParsefn)
 	p.registerInfix(jlang.EQ, p.parseInfixExpression)
@@ -268,6 +270,17 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return leftExp
 }
 
+func (p *Parser) parseGroupedExpression() ast.Expression {
+	p.next()
+	exp := p.parseExpression(LOWEST)
+
+	if !p.expectPeek(jlang.RPAREN) {
+		return nil
+	}
+
+	return exp
+}
+
 func (p *Parser) parsePrefixExpression() ast.Expression {
 	expression := &ast.PrefixExpression{
 		Token:    p.curToken,
@@ -292,4 +305,58 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	exp.RightExpression = p.parseExpression(precedence)
 
 	return exp
+}
+
+func (p *Parser) parseIfExpression() ast.Expression {
+	exp := &ast.IFExpression{
+		Token: p.curToken,
+	}
+
+	if !p.expectPeek(jlang.LPAREN) {
+		return nil
+	}
+
+	p.next()
+	exp.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(jlang.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(jlang.LBRACE) {
+		return nil
+	}
+
+	exp.Consequence = p.parseBlockStatement()
+
+	if p.peekTokenIs(jlang.ELSE) {
+		p.next()
+
+		if !p.expectPeek(jlang.LBRACE) {
+			return nil
+		}
+
+		exp.Alternative = p.parseBlockStatement()
+	}
+
+	return exp
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+
+	blockStmt := &ast.BlockStatement{
+		Token:      p.curToken,
+		Statements: make([]ast.Statement, 0),
+	}
+
+	p.next()
+	for !p.curTokenIs(jlang.RBRACE) && !p.curTokenIs(jlang.EOF) {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			blockStmt.Statements = append(blockStmt.Statements, stmt)
+		}
+		p.next()
+	}
+
+	return blockStmt
 }

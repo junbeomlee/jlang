@@ -207,3 +207,67 @@ func (es *ExpressionStatement) String() string {
 
 	return out.String()
 }
+
+// <if> <condition> <blockstatements> <else> <blockstatements>
+type IFExpression struct {
+	Token       jlang.Token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (ie *IFExpression) TokenValue() string {
+	return ie.Token.Val
+}
+
+func (ie *IFExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("if")
+	if ie.Condition != nil {
+		out.WriteString("(")
+		out.WriteString(ie.Condition.String())
+		out.WriteString(")")
+	}
+
+	if ie.Consequence != nil {
+		out.WriteString("{")
+		for _, stmt := range ie.Consequence.Statements {
+			out.WriteString(stmt.String() + "\n")
+		}
+		out.WriteString("}")
+	}
+
+	out.WriteString("else")
+
+	if ie.Alternative != nil {
+		out.WriteString("{")
+		for _, stmt := range ie.Alternative.Statements {
+			out.WriteString(stmt.String() + "\n")
+		}
+		out.WriteString("}")
+	}
+
+	return out.String()
+}
+
+func (ie *IFExpression) expressionNode() {}
+
+type BlockStatement struct {
+	Token      jlang.Token
+	Statements []Statement
+}
+
+func (b *BlockStatement) TokenValue() string {
+	return b.Token.Val
+}
+
+func (b *BlockStatement) String() string {
+	var out bytes.Buffer
+
+	for _, s := range b.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
