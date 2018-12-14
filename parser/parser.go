@@ -70,6 +70,7 @@ func New(l *jlang.Lexer) *Parser {
 	p.registerPrefix(jlang.FALSE, p.parseBooleanLiteral)
 	p.registerPrefix(jlang.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(jlang.IF, p.parseIfExpression)
+	p.registerPrefix(jlang.FUNCTION, p.parseFunctionExpression)
 
 	p.infixParsefns = make(map[jlang.TokenType]infixParsefn)
 	p.registerInfix(jlang.EQ, p.parseInfixExpression)
@@ -340,6 +341,53 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	}
 
 	return exp
+}
+
+func (p *Parser) parseFunctionExpression() ast.Expression {
+	functionExp := &ast.FunctionExpression{
+		Token: p.curToken,
+	}
+
+	if !p.expectPeek(jlang.LPAREN) {
+		return nil
+	}
+
+	functionExp.Args = p.parseFunctionParameters()
+
+	if !p.expectPeek(jlang.LBRACE) {
+		return nil
+	}
+
+	functionExp.Body = p.parseBlockStatement()
+
+	return functionExp
+}
+
+func (p *Parser) parseFunctionParameters() []*ast.Identifier {
+	identifiers := []*ast.Identifier{}
+
+	for !p.peekTokenIs(jlang.RPAREN) {
+		p.next()
+
+		ident := &ast.Identifier{
+			Token: p.curToken,
+			Value: p.curToken.Val,
+		}
+		identifiers = append(identifiers, ident)
+
+		for p.peekTokenIs(jlang.COMMA) {
+			p.next()
+			p.next()
+			ident := &ast.Identifier{
+				Token: p.curToken,
+				Value: p.curToken.Val,
+			}
+			identifiers = append(identifiers, ident)
+		}
+	}
+
+	p.next()
+	return identifiers
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {

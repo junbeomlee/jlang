@@ -182,7 +182,7 @@ func (rs *ReturnStatement) String() string {
 	out.WriteString(rs.Token.Val + " ")
 
 	if rs.ReturnValue != nil {
-		out.WriteString(rs.ReturnValue.String() + " ")
+		out.WriteString(rs.ReturnValue.String())
 	}
 
 	out.WriteString(";")
@@ -249,6 +249,36 @@ func (ie *IFExpression) String() string {
 	}
 
 	return out.String()
+}
+
+type FunctionExpression struct {
+	Token jlang.Token
+	Args  []*Identifier
+	Body  *BlockStatement
+}
+
+func (f *FunctionExpression) TokenValue() string {
+	return f.Token.Val
+}
+
+func (f *FunctionExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("fn")
+	out.WriteString("(")
+	for _, arg := range f.Args {
+		out.WriteString(arg.String())
+	}
+	out.WriteString(")")
+	out.WriteString("{")
+	out.WriteString(f.Body.String())
+	out.WriteString("}")
+
+	return out.String()
+}
+
+func (f *FunctionExpression) expressionNode() {
+	panic("implement me")
 }
 
 func (ie *IFExpression) expressionNode() {}

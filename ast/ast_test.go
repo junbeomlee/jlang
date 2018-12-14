@@ -32,3 +32,42 @@ func TestLetStatement_String_String(t *testing.T) {
 		t.Errorf("program.String() wrong. got=%q", lstmt.String())
 	}
 }
+
+func TestFunctionExpression_String(t *testing.T) {
+	fExp := FunctionExpression{
+		Args: []*Identifier{
+			{
+				Value: "x",
+				Token: jlang.Token{
+					Val:  "x",
+					Type: jlang.IDENT,
+				},
+			},
+		},
+		Body: &BlockStatement{
+			Statements: []Statement{
+				&ReturnStatement{
+					Token: jlang.Token{
+						Val:  "return",
+						Type: jlang.RETURN,
+					},
+					ReturnValue: &IntegerLiteral{
+						Value: 5,
+						Token: jlang.Token{
+							Val:  "5",
+							Type: jlang.INT,
+						},
+					},
+				},
+			},
+		},
+		Token: jlang.Token{
+			Val:  "fn",
+			Type: jlang.FUNCTION,
+		},
+	}
+
+	if fExp.String() != `fn(x){return 5;}` {
+		t.Errorf("program.String() wrong. got=%q", fExp.String())
+	}
+}
