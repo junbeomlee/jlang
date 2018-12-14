@@ -71,3 +71,25 @@ func TestFunctionExpression_String(t *testing.T) {
 		t.Errorf("program.String() wrong. got=%q", fExp.String())
 	}
 }
+
+func TestCallExpression_String(t *testing.T) {
+	callExp := CallExpression{
+		Args: []Expression{
+			&Identifier{
+				Value: "x",
+				Token: jlang.Token{
+					Val:  "x",
+					Type: jlang.IDENT,
+				},
+			},
+		},
+		Token: jlang.Token{
+			Val:  "add",
+			Type: jlang.IDENT,
+		},
+	}
+
+	if callExp.String() != `add(x)` {
+		t.Errorf("program.String() wrong. got=%q", callExp.String())
+	}
+}

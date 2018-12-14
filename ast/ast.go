@@ -277,6 +277,32 @@ func (f *FunctionExpression) String() string {
 	return out.String()
 }
 
+type CallExpression struct {
+	Token jlang.Token
+	Args  []Expression
+}
+
+func (c *CallExpression) TokenValue() string {
+	return c.Token.Val
+}
+
+func (c *CallExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(c.Token.Val)
+	out.WriteString("(")
+	for _, arg := range c.Args {
+		out.WriteString(arg.String())
+	}
+	out.WriteString(")")
+
+	return out.String()
+}
+
+func (c *CallExpression) expressionNode() {
+	panic("implement me")
+}
+
 func (f *FunctionExpression) expressionNode() {
 	panic("implement me")
 }
