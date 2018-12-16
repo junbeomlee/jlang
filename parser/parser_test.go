@@ -480,6 +480,7 @@ func TestParser_Parse_IfElseExpression(t *testing.T) {
 }
 
 func TestParser_Parse_FuctionExpression(t *testing.T) {
+
 	input := `fn (x,y) { x+y; }`
 	l := jlang.New(input)
 	parser := New(l)
@@ -521,7 +522,40 @@ func TestParser_Parse_FuctionExpression(t *testing.T) {
 	testInfixExpression(t, bodyStmt.Expression, "x", "+", "y")
 }
 
+func TestParser_Parse_CallExpression(t *testing.T) {
+
+	input := `add(x,2)`
+	l := jlang.New(input)
+	parser := New(l)
+	program := parser.Parse()
+	checkParserErrors(t, parser)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+			len(program.Statements))
+	}
+
+	expStmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not *ast.ExpressionStatement. got=%d",
+			program.Statements[0])
+	}
+
+	exp, ok := expStmt.Expression.(*ast.CallExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.FunctionExpression. got=%T", expStmt.Expression)
+	}
+
+	if len(exp.Args) != 2 {
+		t.Fatalf("number of function arguments wrong. want 2. got=%d", len(exp.Args))
+	}
+
+	testLiteralExpression(t, exp.Args[0], "x")
+	testLiteralExpression(t, exp.Args[1], 2)
+}
+
 func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
+
 	ident, ok := exp.(*ast.Identifier)
 	if !ok {
 		t.Errorf("exp not *ast.Identifier. got=%T", exp)

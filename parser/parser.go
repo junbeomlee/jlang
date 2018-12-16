@@ -29,6 +29,7 @@ var precedences = map[jlang.TokenType]int{
 	jlang.MINUS:    SUM,
 	jlang.SLASH:    PRODUCT,
 	jlang.ASTERISK: PRODUCT,
+	jlang.LPAREN:   CALL,
 }
 
 // Expression
@@ -81,6 +82,7 @@ func New(l *jlang.Lexer) *Parser {
 	p.registerInfix(jlang.ASTERISK, p.parseInfixExpression)
 	p.registerInfix(jlang.LT, p.parseInfixExpression)
 	p.registerInfix(jlang.GT, p.parseInfixExpression)
+	p.registerInfix(jlang.LPAREN, p.parseCallExpression)
 
 	return p
 }
@@ -361,6 +363,37 @@ func (p *Parser) parseFunctionExpression() ast.Expression {
 	functionExp.Body = p.parseBlockStatement()
 
 	return functionExp
+}
+
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken}
+	exp.Args = p.parseCallArguments()
+
+	return exp
+}
+
+func (p *Parser) parseCallArguments() []ast.Expression {
+	args := []ast.Expression{}
+
+	if p.peekTokenIs(jlang.RPAREN) {
+		p.next()
+		return args
+	}
+
+	p.next()
+	args = append(args, p.parseExpression(LOWEST))
+
+	for p.peekTokenIs(jlang.COMMA) {
+		p.next()
+		p.next()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(jlang.RPAREN) {
+		return nil
+	}
+
+	return args
 }
 
 func (p *Parser) parseFunctionParameters() []*ast.Identifier {
