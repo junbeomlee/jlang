@@ -209,7 +209,7 @@ func isSpace(ch byte) bool {
 }
 
 func isDigit(ch byte) bool {
-	return ch == '+' || ch == '-' || ('0' <= ch && ch <= '9')
+	return ('0' <= ch && ch <= '9')
 }
 
 // lexIdentifier scans an alphanumeric.

@@ -3,6 +3,8 @@ package ast
 import (
 	"bytes"
 
+	"strings"
+
 	"github.com/junbeomlee/jlang"
 )
 
@@ -278,8 +280,9 @@ func (f *FunctionExpression) String() string {
 }
 
 type CallExpression struct {
-	Token jlang.Token
-	Args  []Expression
+	Token    jlang.Token
+	Function Expression
+	Args     []Expression
 }
 
 func (c *CallExpression) TokenValue() string {
@@ -289,11 +292,14 @@ func (c *CallExpression) TokenValue() string {
 func (c *CallExpression) String() string {
 	var out bytes.Buffer
 
-	out.WriteString(c.Token.Val)
-	out.WriteString("(")
-	for _, arg := range c.Args {
-		out.WriteString(arg.String())
+	args := []string{}
+	for _, a := range c.Args {
+		args = append(args, a.String())
 	}
+
+	out.WriteString(c.Function.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
 
 	return out.String()

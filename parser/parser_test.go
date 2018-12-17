@@ -12,15 +12,16 @@ import (
 func TestParser_Parse_LetStatements(t *testing.T) {
 	input := `
 	let x = 5;
-	let y = 5;
+	let y = true;
 	let foobar = 838383;
 `
 	tests := []struct {
 		expectedIdentifier string
+		expectetValue      interface{}
 	}{
-		{"x"},
-		{"y"},
-		{"foobar"},
+		{"x", 5},
+		{"y", true},
+		{"foobar", 838383},
 	}
 
 	l := jlang.New(input)
@@ -42,6 +43,11 @@ func TestParser_Parse_LetStatements(t *testing.T) {
 
 		stmt := program.Statements[i]
 		if !testLetStatement(t, stmt, tt.expectedIdentifier) {
+			return
+		}
+
+		val := stmt.(*ast.LetStatement).Value
+		if !testLiteralExpression(t, val, tt.expectetValue) {
 			return
 		}
 	}
@@ -317,6 +323,18 @@ func TestParser_Parse_OperatorPrecedenceParsing(t *testing.T) {
 		{
 			"!(true == true)",
 			"(!(true == true))",
+		},
+		{
+			"a + add(b * c) + d",
+			"((a + add((b * c))) + d)",
+		},
+		{
+			"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+			"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+		},
+		{
+			"add(a + b + c * d / f + g)",
+			"add((((a + b) + ((c * d) / f)) + g))",
 		},
 	}
 
@@ -658,10 +676,6 @@ func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
 }
 
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.String() != "let" {
-		t.Errorf("s.TokenLiteral not 'let'. got=%q", s.String())
-		return false
-	}
 
 	letStmt, ok := s.(*ast.LetStatement)
 	if !ok {
@@ -681,4 +695,12 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	}
 
 	return true
+}
+
+func TestParser_asd(t *testing.T) {
+	input := `2*3+5`
+	l := jlang.New(input)
+	parser := New(l)
+	parser.Parse()
+	checkParserErrors(t, parser)
 }

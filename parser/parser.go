@@ -216,7 +216,11 @@ func (p *Parser) parseLetStatement() ast.Statement {
 		return nil
 	}
 
-	for !p.curTokenIs(jlang.SEMICOLON) {
+	p.next()
+
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(jlang.SEMICOLON) {
 		p.next()
 	}
 
@@ -229,9 +233,10 @@ func (p *Parser) parseReturnStatement() ast.Statement {
 	stmt := &ast.ReturnStatement{Token: p.curToken}
 
 	// Check next
-	// todo expression
 	p.next()
-	for !p.curTokenIs(jlang.SEMICOLON) {
+	stmt.ReturnValue = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(jlang.SEMICOLON) {
 		p.next()
 	}
 
@@ -366,7 +371,7 @@ func (p *Parser) parseFunctionExpression() ast.Expression {
 }
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
-	exp := &ast.CallExpression{Token: p.curToken}
+	exp := &ast.CallExpression{Token: p.curToken, Function: function}
 	exp.Args = p.parseCallArguments()
 
 	return exp

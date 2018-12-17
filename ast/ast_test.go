@@ -83,9 +83,12 @@ func TestCallExpression_String(t *testing.T) {
 				},
 			},
 		},
-		Token: jlang.Token{
-			Val:  "add",
-			Type: jlang.IDENT,
+		Function: &Identifier{
+			Value: "add",
+			Token: jlang.Token{
+				Val:  "add",
+				Type: jlang.IDENT,
+			},
 		},
 	}
 

@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/junbeomlee/jlang"
+	"github.com/junbeomlee/jlang/parser"
 )
 
 const PROMPT = ">>"
@@ -28,8 +29,19 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		l := jlang.New(line)
-		for token := l.NextToken(); token.Type != jlang.EOF; token = l.NextToken() {
-			fmt.Printf("%+v\n", token)
+		p := parser.New(l)
+		program := p.Parse()
+
+		if len(p.Errors()) != 0 {
+			printParserErrors(out, p.Errors())
 		}
+		io.WriteString(out, program.String())
+		io.WriteString(out, "\n")
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
 	}
 }

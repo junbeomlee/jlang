@@ -223,13 +223,20 @@ func TestLexer_NextToken3(t *testing.T) {
 }
 
 func TestLexer_NextToken4(t *testing.T) {
-	input := `let a = 5;`
+	input := `2*3+5`
 
 	l := New(input)
-	fmt.Print(l.NextToken())
-	fmt.Print(l.NextToken())
-	fmt.Print(l.NextToken())
-	fmt.Print(l.NextToken())
-	fmt.Print(l.NextToken())
-	fmt.Print(l.NextToken())
+	fmt.Print(l.NextToken().Val)
+	fmt.Print(l.NextToken().Val)
+	fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
+	//fmt.Print(l.NextToken().Val)
 }
